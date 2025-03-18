@@ -41,12 +41,12 @@ export default function AlbumPage({
   const emotion = useParams<{ id: string; folderId: string }>();
 
   const { data, isLoading, isValidating } = useSWR<Folders>(
-    `http://smilephoto.wsnet.jp/albums`,
+    `https://smilephoto.wsnet.jp/albums`,
     fetcher
   );
 
   const { data: folder } = useSWR<Folder>(
-    `http://smilephoto.wsnet.jp/images/${emotion.id}/${emotion.folderId}`,
+    `https://smilephoto.wsnet.jp/images/${emotion.id}/${emotion.folderId}`,
     fetcher
   );
 

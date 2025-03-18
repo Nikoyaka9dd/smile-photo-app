@@ -22,7 +22,7 @@ export default function SmilePhotoApp() {
   const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   const { data, isLoading, isValidating } = useSWR<Folders>(
-    `http://smilephoto.wsnet.jp/albums`,
+    `https://smilephoto.wsnet.jp/albums`,
     fetcher
   );
 

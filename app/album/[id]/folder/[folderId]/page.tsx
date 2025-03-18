@@ -56,12 +56,12 @@ export default function FolderPage({
     error,
     isLoading,
   } = useSWR<Folder>(
-    `http://smilephoto.wsnet.jp/images/${emotion.id}/${emotion.folderId}`,
+    `https://smilephoto.wsnet.jp/images/${emotion.id}/${emotion.folderId}`,
     fetcher
   );
 
   const { data: allFolder, isValidating } = useSWR<Folders>(
-    `http://smilephoto.wsnet.jp/albums`,
+    `https://smilephoto.wsnet.jp/albums`,
     fetcher
   );
   console.log("🐣", folder);

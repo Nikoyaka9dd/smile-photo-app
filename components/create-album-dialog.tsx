@@ -134,7 +134,7 @@ export function CreateAlbumDialog({
     }
 
     axios
-      .post("http://smilephoto.wsnet.jp/upload", formData, {
+      .post("https://smilephoto.wsnet.jp/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
