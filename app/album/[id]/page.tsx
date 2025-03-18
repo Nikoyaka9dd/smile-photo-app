@@ -5,17 +5,26 @@ import Link from "next/link";
 import { ChevronLeft, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { useRouter } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { CreateAlbumDialog } from "@/components/create-album-dialog";
-import { useAlbumStore } from "@/lib/store";
 import { getFoldersForAlbum } from "@/lib/services/folder-service";
 import { Logo } from "@/components/logo";
 import { CuteFolder } from "@/components/cute-folder";
+import useSWR from "swr";
+import axios from "axios";
 
-
+export const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 type Params = {
   id: string;
+};
+export type Folder = {
+  album_id: string;
+  title: string;
+};
+
+export type Folders = {
+  albums: Folder[];
 };
 
 export default function AlbumPage({
@@ -28,18 +37,26 @@ export default function AlbumPage({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [createAlbumOpen, setCreateAlbumOpen] = useState(false);
   const [folders, setFolders] = useState<any[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const { albums, addAlbum, setSelectedAlbum } = useAlbumStore();
+
+  const emotion = useParams<{ id: string; folderId: string }>();
+
+  const { data, isLoading, isValidating } = useSWR<Folders>(
+    `http://smilephoto.wsnet.jp/albums`,
+    fetcher
+  );
+
+  const { data: folder } = useSWR<Folder>(
+    `http://smilephoto.wsnet.jp/images/${emotion.id}/${emotion.folderId}`,
+    fetcher
+  );
+
+  console.log("👹", folder);
 
   // Update selected album when the page loads
-  useEffect(() => {
-    setSelectedAlbum(unwrapParams.id);
-  }, [unwrapParams.id, setSelectedAlbum]);
 
   // Fetch folders when the album ID changes
   useEffect(() => {
     const loadFolders = async () => {
-      setIsLoading(true);
       try {
         const folderData = await getFoldersForAlbum(unwrapParams.id);
         setFolders(folderData);
@@ -53,29 +70,15 @@ export default function AlbumPage({
           { id: "straight", name: "Straight" },
         ]);
       } finally {
-        setIsLoading(false);
       }
     };
 
     loadFolders();
   }, [unwrapParams.id]);
 
-  // Get album title based on ID
-  const getAlbumTitle = (id: string) => {
-    const album = albums.find((a) => a.id === id);
-    return album ? album.title : "アルバム";
-  };
-
-  const albumTitle = getAlbumTitle(unwrapParams.id);
-
   // Handle folder click
   const handleFolderClick = (folderId: string) => {
     router.push(`/album/${unwrapParams.id}/folder/${folderId}`);
-  };
-
-  // Handle album creation
-  const handleAlbumCreate = (newAlbum: any) => {
-    addAlbum(newAlbum);
   };
 
   return (
@@ -112,18 +115,18 @@ export default function AlbumPage({
             </Button>
 
             <div className="mt-4 flex flex-col gap-2 sidebar-scrollbar pr-2 max-h-[calc(100vh-120px)]">
-              {albums.map((album) => (
+              {data?.albums?.map((album) => (
                 <Link
-                  key={album.id}
-                  href={`/album/${album.id}`}
+                  key={album.album_id}
+                  href={`/album/${album.album_id}`}
                   className={cn(
-                    "card-cute block w-full rounded-md p-4 text-left",
-                    album.selected
-                      ? "bg-[#e8a0b0] hover:bg-[#e090a0]"
-                      : "bg-[#f0c0d0] hover:bg-[#e8b0c0]"
+                    "card-cute block w-full rounded-md p-4 text-left"
+                    // album.selected
+                    //   ? "bg-[#e8a0b0] hover:bg-[#e090a0]"
+                    //   : "bg-[#f0c0d0] hover:bg-[#e8b0c0]"
                   )}
                 >
-                  <div className="text-xs text-gray-600">{album.date}</div>
+                  {/* <div className="text-xs text-gray-600">{album.date}</div> */}
                   <div className="font-medium">{album.title}</div>
                 </Link>
               ))}
@@ -147,7 +150,8 @@ export default function AlbumPage({
               href={`/album/${unwrapParams.id}`}
               className="text-xl font-medium hover:underline"
             >
-              {albumTitle}
+              {data?.albums.find((album) => album.album_id === unwrapParams.id)
+                ?.title || "アルバム"}
             </Link>
             <span className="mx-1 text-xl font-medium">&gt;</span>
           </div>
@@ -199,7 +203,6 @@ export default function AlbumPage({
       <CreateAlbumDialog
         open={createAlbumOpen}
         onOpenChange={setCreateAlbumOpen}
-        onAlbumCreate={handleAlbumCreate}
       />
     </div>
   );

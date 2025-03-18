@@ -17,24 +17,22 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 
 // Fix the TypeScript error with the directory attribute by adding a custom type declaration
-declare module "react" {
-  interface HTMLAttributes<T> extends React.HTMLAttributes<T> {
-    // Add support for the non-standard directory attribute
-    directory?: string;
-    webkitdirectory?: string;
-  }
-}
+// declare module "react" {
+//   interface HTMLAttributes<T> extends React.HTMLAttributes<T> {
+//     // Add support for the non-standard directory attribute
+//     directory?: string;
+//     webkitdirectory?: string;
+//   }
+// }
 
 interface CreateAlbumDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onAlbumCreate: (album: Album) => void;
 }
 
 export function CreateAlbumDialog({
   open,
   onOpenChange,
-  onAlbumCreate,
 }: CreateAlbumDialogProps) {
   const [albumName, setAlbumName] = useState("");
   const [startDate, setStartDate] = useState("");
@@ -134,11 +132,9 @@ export function CreateAlbumDialog({
         console.log(key, value);
       }
     }
-    console.log("formDAta", formData);
-    console.log("newAlbum", newAlbum);
 
     axios
-      .post("https://5905-126-158-191-212.ngrok-free.app//upload", formData, {
+      .post("http://smilephoto.wsnet.jp/upload", formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
@@ -149,9 +145,6 @@ export function CreateAlbumDialog({
       .catch(function (error) {
         console.log(error);
       });
-
-    // Call the callback to add the album to the list
-    onAlbumCreate(newAlbum);
 
     // Close the dialog
     onOpenChange(false);
@@ -231,8 +224,6 @@ export function CreateAlbumDialog({
                 ref={dirInputRef}
                 onChange={handleDirChange}
                 className="hidden"
-                webkitdirectory="true"
-                directory=""
               />
               <div className="flex flex-col items-center justify-center gap-2">
                 <Upload className="h-10 w-10 text-gray-400" />

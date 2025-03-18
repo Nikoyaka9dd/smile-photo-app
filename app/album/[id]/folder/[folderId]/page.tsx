@@ -7,12 +7,12 @@ import { ChevronLeft, Plus, Heart } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { CreateAlbumDialog } from "@/components/create-album-dialog";
-import { useAlbumStore } from "@/lib/store";
 import { getFoldersForAlbum } from "@/lib/services/folder-service";
 import { Logo } from "@/components/logo";
 import useSWR from "swr";
 import axios from "axios";
 import { useParams } from "next/navigation";
+import { Folders } from "../../page";
 
 const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
@@ -33,6 +33,12 @@ type Params = {
   folderId: string;
 };
 
+type Folder = {
+  album_id: string;
+  category: string;
+  images: string[];
+};
+
 export default function FolderPage({
   params,
 }: {
@@ -42,19 +48,23 @@ export default function FolderPage({
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [createAlbumOpen, setCreateAlbumOpen] = useState(false);
   const [currentFolder, setCurrentFolder] = useState<any | null>(null);
-  const { albums, addAlbum, setSelectedAlbum } = useAlbumStore();
   // TODO: 画像と割り振り先のフォルダをGETしてゴニョゴニョ
   const emotion = useParams<{ id: string; folderId: string }>();
-  console.log("emotion", emotion.folderId);
 
-  const { data, error, isLoading } = useSWR(
-    `https://5905-126-158-191-212.ngrok-free.app`,
+  const {
+    data: folder,
+    error,
+    isLoading,
+  } = useSWR<Folder>(
+    `http://smilephoto.wsnet.jp/images/${emotion.id}/${emotion.folderId}`,
     fetcher
   );
 
-  useEffect(() => {
-    setSelectedAlbum(unwrapParams.id);
-  }, [unwrapParams.id, setSelectedAlbum]);
+  const { data: allFolder, isValidating } = useSWR<Folders>(
+    `http://smilephoto.wsnet.jp/albums`,
+    fetcher
+  );
+  console.log("🐣", folder);
 
   // APIを叩く動作を作るぞ
 
@@ -77,27 +87,16 @@ export default function FolderPage({
     loadFolderInfo();
   }, [unwrapParams.id, unwrapParams.folderId]);
 
-  // Get album title based on ID
-  const getAlbumTitle = (id: string) => {
-    const album = albums.find((a) => a.id === id);
-    return album ? album.title : "アルバム";
-  };
-
-  const albumTitle = getAlbumTitle(unwrapParams.id);
   const folderName = currentFolder?.name || unwrapParams.folderId;
 
   // Handle album creation
   const handleAlbumCreate = (newAlbum: any) => {
     console.log("アルバム作成");
-    addAlbum(newAlbum);
   };
 
   if (isLoading) {
     return <div>ちょっと待ってね...</div>;
   }
-  console.log(data);
-
-  console.log(data?.images);
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
@@ -133,18 +132,18 @@ export default function FolderPage({
             </Button>
 
             <div className="mt-4 flex flex-col gap-2 sidebar-scrollbar pr-2 max-h-[calc(100vh-120px)]">
-              {albums.map((album) => (
+              {allFolder?.albums.map((album) => (
                 <Link
-                  key={album.id}
-                  href={`/album/${album.id}`}
+                  key={album.album_id}
+                  href={`/album/${album.album_id}`}
                   className={cn(
-                    "card-cute block w-full rounded-md p-4 text-left",
-                    album.selected
-                      ? "bg-[#e8a0b0] hover:bg-[#e090a0]"
-                      : "bg-[#f0c0d0] hover:bg-[#e8b0c0]"
+                    "card-cute block w-full rounded-md p-4 text-left"
+                    // album.selected
+                    //   ? "bg-[#e8a0b0] hover:bg-[#e090a0]"
+                    //   : "bg-[#f0c0d0] hover:bg-[#e8b0c0]"
                   )}
                 >
-                  <div className="text-xs text-gray-600">{album.date}</div>
+                  {/* <div className="text-xs text-gray-600">{album.date}</div> */}
                   <div className="font-medium">{album.title}</div>
                 </Link>
               ))}
@@ -168,7 +167,10 @@ export default function FolderPage({
               href={`/album/${unwrapParams.id}`}
               className="text-xl font-medium hover:underline"
             >
-              {albumTitle}
+              {/* ここに今見ているアルバムのtitleが入る */}
+              {allFolder?.albums.find(
+                (album) => album.album_id === unwrapParams.id
+              )?.title || "アルバム"}
             </Link>
             <span className="mx-1 text-xl font-medium">&gt;</span>
             <span className="text-xl font-medium">{folderName}</span>
@@ -178,7 +180,7 @@ export default function FolderPage({
 
         {/* Photo grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
-          {data?.images?.map((photo) => (
+          {folder?.images?.map((photo) => (
             <div key={photo} className="col-span-1 group relative">
               <div className="card-cute overflow-hidden rounded-lg">
                 <Image
@@ -192,7 +194,6 @@ export default function FolderPage({
               <button className="absolute top-2 right-2 bg-white/80 p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 hover:bg-white">
                 <Heart className="h-4 w-4 text-pink-500" />
               </button>
-              <div className="mt-2 text-sm text-gray-600">{photo.alt}</div>
             </div>
           ))}
         </div>
@@ -205,7 +206,6 @@ export default function FolderPage({
       <CreateAlbumDialog
         open={createAlbumOpen}
         onOpenChange={setCreateAlbumOpen}
-        onAlbumCreate={handleAlbumCreate}
       />
     </div>
   );

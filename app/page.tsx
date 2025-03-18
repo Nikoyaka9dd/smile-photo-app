@@ -1,22 +1,30 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useRef } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { ChevronLeft, Plus } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { CreateAlbumDialog } from "@/components/create-album-dialog"
-import { useAlbumStore } from "@/lib/store"
-import { Logo } from "@/components/logo"
+import { useState, useEffect, useRef } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { CreateAlbumDialog } from "@/components/create-album-dialog";
+import { Logo } from "@/components/logo";
+import useSWR from "swr";
+import axios from "axios";
+import { Folders } from "./album/[id]/page";
+
+export const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 export default function SmilePhotoApp() {
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
-  const [visibleSections, setVisibleSections] = useState<number[]>([])
-  const { albums, addAlbum } = useAlbumStore()
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [createAlbumOpen, setCreateAlbumOpen] = useState(false);
+  const [visibleSections, setVisibleSections] = useState<number[]>([]);
 
-  const sectionRefs = useRef<(HTMLDivElement | null)[]>([])
+  const sectionRefs = useRef<(HTMLDivElement | null)[]>([]);
+
+  const { data, isLoading, isValidating } = useSWR<Folders>(
+    `http://smilephoto.wsnet.jp/albums`,
+    fetcher
+  );
 
   // Handle scroll animations
   useEffect(() => {
@@ -24,33 +32,33 @@ export default function SmilePhotoApp() {
       (entries) => {
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
-            const index = sectionRefs.current.findIndex((ref) => ref === entry.target)
+            const index = sectionRefs.current.findIndex(
+              (ref) => ref === entry.target
+            );
             if (index !== -1 && !visibleSections.includes(index)) {
-              setVisibleSections(prev => [...prev, index])
+              setVisibleSections((prev) => [...prev, index]);
             }
           }
-        })
+        });
       },
       { threshold: 0.1 }
-    )
-  
+    );
+
     sectionRefs.current.forEach((ref) => {
-      if (ref) observer.observe(ref)
-    })
-  
+      if (ref) observer.observe(ref);
+    });
+
     return () => {
       sectionRefs.current.forEach((ref) => {
-        if (ref) observer.unobserve(ref)
-      })
-    }
-  }, [visibleSections])
+        if (ref) observer.unobserve(ref);
+      });
+    };
+  }, [visibleSections]);
 
   // Handle album creation
-  const handleAlbumCreate = (newAlbum: any) => {
-    addAlbum(newAlbum)
-  }
+  const handleAlbumCreate = (newAlbum: any) => {};
 
-  const photoSections = []
+  const photoSections = [];
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
@@ -58,7 +66,7 @@ export default function SmilePhotoApp() {
       <div
         className={cn(
           "relative flex flex-col bg-[#f8d7e0] transition-all duration-300 ease-in-out",
-          sidebarCollapsed ? "w-0" : "w-64",
+          sidebarCollapsed ? "w-0" : "w-64"
         )}
       >
         {/* Toggle button */}
@@ -66,7 +74,12 @@ export default function SmilePhotoApp() {
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="absolute -right-8 top-6 z-10 rounded-r-full bg-[#f8d7e0] p-2 shadow-md hover:bg-[#f0c0d0] transition-all duration-300"
         >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform", sidebarCollapsed && "rotate-180")} />
+          <ChevronLeft
+            className={cn(
+              "h-4 w-4 transition-transform",
+              sidebarCollapsed && "rotate-180"
+            )}
+          />
         </button>
 
         <div className="flex-1 overflow-hidden">
@@ -81,16 +94,17 @@ export default function SmilePhotoApp() {
             </Button>
 
             <div className="mt-4 flex flex-col gap-2 sidebar-scrollbar pr-2 max-h-[calc(100vh-120px)]">
-              {albums.map((album) => (
+              {data?.albums?.map((album) => (
                 <Link
-                  key={album.id}
-                  href={`/album/${album.id}`}
+                  key={album.album_id}
+                  href={`/album/${album.album_id}`}
                   className={cn(
-                    "card-cute block w-full rounded-md p-4 text-left",
-                    album.selected ? "bg-[#e8a0b0] hover:bg-[#e090a0]" : "bg-[#f0c0d0] hover:bg-[#e8b0c0]",
+                    "card-cute block w-full rounded-md p-4 text-left"
+                    // album.selected
+                    //   ? "bg-[#e8a0b0] hover:bg-[#e090a0]"
+                    //   : "bg-[#f0c0d0] hover:bg-[#e8b0c0]"
                   )}
                 >
-                  <div className="text-xs text-gray-600">{album.date}</div>
                   <div className="font-medium">{album.title}</div>
                 </Link>
               ))}
@@ -114,16 +128,24 @@ export default function SmilePhotoApp() {
 
           {/* Main heading */}
           <div
-          ref={(el) => { sectionRefs.current[0] = el }}
+            ref={(el) => {
+              sectionRefs.current[0] = el;
+            }}
             className={cn(
               "mb-8 transform transition-all duration-500",
-              visibleSections.includes(0) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
+              visibleSections.includes(0)
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
             )}
           >
             <div className="flex items-start justify-center pb-12">
               <div className="max-w-2xl w-full text-center">
-                <h2 className="mb-4 text-5xl font-bold">思い返そう、あの笑顔</h2>
-                <p className="mb-2 text-2xl">友達との旅行、お子様の成長記録......</p>
+                <h2 className="mb-4 text-5xl font-bold">
+                  思い返そう、あの笑顔
+                </h2>
+                <p className="mb-2 text-2xl">
+                  友達との旅行、お子様の成長記録......
+                </p>
                 <p className="mb-2 text-2xl">
                   大切な写真を、AIと一緒に楽に整理しましょう。
                 </p>
@@ -140,10 +162,14 @@ export default function SmilePhotoApp() {
           {/* Photo grid */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div
-              ref={(el) => { sectionRefs.current[1] = el }}
+              ref={(el) => {
+                sectionRefs.current[1] = el;
+              }}
               className={cn(
                 "transform transition-all duration-500 delay-100",
-                 visibleSections.includes(1) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+                visibleSections.includes(1)
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
               )}
             >
               <div className="card-cute overflow-hidden rounded-lg">
@@ -159,10 +185,14 @@ export default function SmilePhotoApp() {
 
             <div className="grid grid-cols-1 gap-4">
               <div
-              ref={(el) => { sectionRefs.current[2] = el }}
+                ref={(el) => {
+                  sectionRefs.current[2] = el;
+                }}
                 className={cn(
                   "transform transition-all duration-500 delay-200",
-                  visibleSections.includes(2) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+                  visibleSections.includes(2)
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-10 opacity-0"
                 )}
               >
                 <div className="card-cute overflow-hidden rounded-lg">
@@ -177,10 +207,14 @@ export default function SmilePhotoApp() {
               </div>
 
               <div
-              ref={(el) => { sectionRefs.current[3] = el }}
+                ref={(el) => {
+                  sectionRefs.current[3] = el;
+                }}
                 className={cn(
                   "transform transition-all duration-500 delay-300",
-                  visibleSections.includes(3) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+                  visibleSections.includes(3)
+                    ? "translate-y-0 opacity-100"
+                    : "translate-y-10 opacity-0"
                 )}
               >
                 <div className="card-cute overflow-hidden rounded-lg">
@@ -196,10 +230,14 @@ export default function SmilePhotoApp() {
             </div>
 
             <div
-            ref={(el) => { sectionRefs.current[4] = el }}
+              ref={(el) => {
+                sectionRefs.current[4] = el;
+              }}
               className={cn(
                 "transform transition-all duration-500 delay-400",
-                visibleSections.includes(4) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+                visibleSections.includes(4)
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
               )}
             >
               <div className="card-cute overflow-hidden rounded-lg">
@@ -214,10 +252,14 @@ export default function SmilePhotoApp() {
             </div>
 
             <div
-            ref={(el) => { sectionRefs.current[5] = el }}
+              ref={(el) => {
+                sectionRefs.current[5] = el;
+              }}
               className={cn(
                 "transform transition-all duration-500 delay-500",
-                visibleSections.includes(5) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+                visibleSections.includes(5)
+                  ? "translate-y-0 opacity-100"
+                  : "translate-y-10 opacity-0"
               )}
             >
               <div className="card-cute overflow-hidden rounded-lg">
@@ -239,7 +281,9 @@ export default function SmilePhotoApp() {
             }}
             className={cn(
               "mt-8 flex justify-center transform transition-all duration-500 delay-600",
-              visibleSections.includes(6) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+              visibleSections.includes(6)
+                ? "translate-y-0 opacity-100"
+                : "translate-y-10 opacity-0"
             )}
           >
             <Button
@@ -257,8 +301,10 @@ export default function SmilePhotoApp() {
       </div>
 
       {/* Create Album Dialog */}
-      <CreateAlbumDialog open={createAlbumOpen} onOpenChange={setCreateAlbumOpen} onAlbumCreate={handleAlbumCreate} />
+      <CreateAlbumDialog
+        open={createAlbumOpen}
+        onOpenChange={setCreateAlbumOpen}
+      />
     </div>
-  )
+  );
 }
-
