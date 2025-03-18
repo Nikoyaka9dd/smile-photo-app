@@ -7,6 +7,7 @@ interface CuteFolderProps {
   count?: number
   onClick?: () => void
   className?: string
+  style?: React.CSSProperties
 }
 
 export function CuteFolder({ name, count, onClick, className }: CuteFolderProps) {

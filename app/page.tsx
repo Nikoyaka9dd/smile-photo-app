@@ -50,33 +50,7 @@ export default function SmilePhotoApp() {
     addAlbum(newAlbum)
   }
 
-  const photoSections = [
-    {
-      id: "family",
-      image: "/placeholder.svg?height=200&width=300",
-      alt: "",
-    },
-    {
-      id: "snowboard",
-      image: "/placeholder.svg?height=200&width=300",
-      alt: "",
-    },
-    {
-      id: "kimono",
-      image: "/placeholder.svg?height=200&width=300",
-      alt: "",
-    },
-    {
-      id: "baby",
-      image: "/placeholder.svg?height=200&width=300",
-      alt: "",
-    },
-    {
-      id: "cones",
-      image: "/placeholder.svg?height=200&width=300",
-      alt: "",
-    },
-  ]
+  const photoSections = []
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import Link from "next/link"
 import { ChevronLeft, Plus } from "lucide-react"
 import { cn } from "@/lib/utils"
@@ -20,8 +20,9 @@ type Params = {
 export default function AlbumPage({
   params,
 }: {
-  params: Params
+  params: Promise<{ id: string, folderId: string}>
 }) {
+  const unwrapParams = use(params);
   const router = useRouter()
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
@@ -31,15 +32,15 @@ export default function AlbumPage({
 
   // Update selected album when the page loads
   useEffect(() => {
-    setSelectedAlbum(params.id)
-  }, [params.id, setSelectedAlbum])
+    setSelectedAlbum(unwrapParams.id)
+  }, [unwrapParams.id, setSelectedAlbum])
 
   // Fetch folders when the album ID changes
   useEffect(() => {
     const loadFolders = async () => {
       setIsLoading(true)
       try {
-        const folderData = await getFoldersForAlbum(params.id)
+        const folderData = await getFoldersForAlbum(unwrapParams.id)
         setFolders(folderData)
       } catch (error) {
         console.error("Error loading folders:", error)
@@ -56,7 +57,7 @@ export default function AlbumPage({
     }
 
     loadFolders()
-  }, [params.id])
+  }, [unwrapParams.id])
 
   // Get album title based on ID
   const getAlbumTitle = (id: string) => {
@@ -64,11 +65,11 @@ export default function AlbumPage({
     return album ? album.title : "アルバム"
   }
 
-  const albumTitle = getAlbumTitle(params.id)
+  const albumTitle = getAlbumTitle(unwrapParams.id)
 
   // Handle folder click
   const handleFolderClick = (folderId: string) => {
-    router.push(`/album/${params.id}/folder/${folderId}`)
+    router.push(`/album/${unwrapParams.id}/folder/${folderId}`)
   }
 
   // Handle album creation
@@ -134,7 +135,7 @@ export default function AlbumPage({
             <Link href="/" className="mr-2">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <Link href={`/album/${params.id}`} className="text-xl font-medium hover:underline">
+            <Link href={`/album/${unwrapParams.id}`} className="text-xl font-medium hover:underline">
               {albumTitle}
             </Link>
             <span className="mx-1 text-xl font-medium">&gt;</span>

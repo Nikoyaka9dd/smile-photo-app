@@ -2,7 +2,6 @@
 export interface EmotionFolder {
   id: string
   name: string
-  count?: number // Optional count of photos in the folder
 }
 
 // Mock function to simulate fetching folders from a database
@@ -14,10 +13,10 @@ export async function getFoldersForAlbum(albumId: string): Promise<EmotionFolder
   await new Promise((resolve) => setTimeout(resolve, 100))
 
   return [
-    { id: "smile", name: "Smile", count: 12 },
-    { id: "cry", name: "Cry", count: 5 },
-    { id: "funny", name: "Funny", count: 8 },
-    { id: "normal", name: "Normal", count: 15 },
+    { id: "smile", name: "Smile", },
+    { id: "cry", name: "Cry", },
+    { id: "funny", name: "Funny", },
+    { id: "normal", name: "Normal", },
   ]
 }
 

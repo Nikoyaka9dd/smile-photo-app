@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { ChevronLeft, Plus, Heart } from "lucide-react"
@@ -20,43 +20,7 @@ interface Photo {
 }
 
 // Sample photos for all folders
-const samplePhotos: Photo[] = [
-  {
-    id: "1",
-    src: "/placeholder.svg?height=300&width=400",
-    alt: "スノーボードをする人の写真",
-    width: 400,
-    height: 300,
-  },
-  {
-    id: "2",
-    src: "/placeholder.svg?height=300&width=400",
-    alt: "友達と楽しむ女性たちの写真",
-    width: 400,
-    height: 300,
-  },
-  {
-    id: "3",
-    src: "/placeholder.svg?height=300&width=400",
-    alt: "会議中のビジネスマンの写真",
-    width: 400,
-    height: 300,
-  },
-  {
-    id: "4",
-    src: "/placeholder.svg?height=300&width=400",
-    alt: "夜の街でポーズをとるビジネスマンの写真",
-    width: 400,
-    height: 300,
-  },
-  {
-    id: "5",
-    src: "/placeholder.svg?height=300&width=400",
-    alt: "料理をする料理人の写真",
-    width: 400,
-    height: 300,
-  },
-]
+const samplePhotos: Photo[] = []
 
 // Fix the type definition to match Next.js expectations
 type Params = {
@@ -67,24 +31,26 @@ type Params = {
 export default function FolderPage({
   params,
 }: {
-  params: Params
+  params: Promise<{ id: string, folderId: string }>
 }) {
+  const unwrapParams = use(params);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
   const [currentFolder, setCurrentFolder] = useState<any | null>(null)
   const { albums, addAlbum, setSelectedAlbum } = useAlbumStore()
+  console.log(unwrapParams.id);
 
   // Update selected album when the page loads
   useEffect(() => {
-    setSelectedAlbum(params.id)
-  }, [params.id, setSelectedAlbum])
+    setSelectedAlbum(unwrapParams.id)
+  }, [unwrapParams.id, setSelectedAlbum])
 
   // Fetch folder information
   useEffect(() => {
     const loadFolderInfo = async () => {
       try {
-        const folders = await getFoldersForAlbum(params.id)
-        const folder = folders.find((f: any) => f.id === params.folderId)
+        const folders = await getFoldersForAlbum(unwrapParams.id)
+        const folder = folders.find((f: any) => f.id === unwrapParams.folderId)
         if (folder) {
           setCurrentFolder(folder)
         }
@@ -94,7 +60,7 @@ export default function FolderPage({
     }
 
     loadFolderInfo()
-  }, [params.id, params.folderId])
+  }, [unwrapParams.id, unwrapParams.folderId])
 
   // Get album title based on ID
   const getAlbumTitle = (id: string) => {
@@ -102,8 +68,8 @@ export default function FolderPage({
     return album ? album.title : "アルバム"
   }
 
-  const albumTitle = getAlbumTitle(params.id)
-  const folderName = currentFolder?.name || params.folderId
+  const albumTitle = getAlbumTitle(unwrapParams.id)
+  const folderName = currentFolder?.name || unwrapParams.folderId
 
   // Handle album creation
   const handleAlbumCreate = (newAlbum: any) => {
@@ -165,16 +131,16 @@ export default function FolderPage({
         {/* Header */}
         <div className="border-b p-4 flex items-center justify-between">
           <div className="flex items-center">
-            <Link href={`/album/${params.id}`} className="mr-2">
+            <Link href={`/album/${unwrapParams.id}`} className="mr-2">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <Link href={`/album/${params.id}`} className="text-xl font-medium hover:underline">
+            <Link href={`/album/${unwrapParams.id}`} className="text-xl font-medium hover:underline">
               {albumTitle}
             </Link>
             <span className="mx-1 text-xl font-medium">&gt;</span>
             <span className="text-xl font-medium">{folderName}</span>
           </div>
-          <Logo size="small" />
+          <Logo size="large"/>
         </div>
 
         {/* Photo grid */}
