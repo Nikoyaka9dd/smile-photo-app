@@ -1,85 +1,82 @@
-"use client"
+"use client";
 
-import { useState, useEffect, use } from "react"
-import Link from "next/link"
-import { ChevronLeft, Plus } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { useRouter } from "next/navigation"
-import { CreateAlbumDialog } from "@/components/create-album-dialog"
-import { useAlbumStore } from "@/lib/store"
-import { getFoldersForAlbum } from "@/lib/services/folder-service"
-import { Logo } from "@/components/logo"
-import { CuteFolder } from "@/components/cute-folder"
-import useSWR from 'swr'
+import { useState, useEffect, use } from "react";
+import Link from "next/link";
+import { ChevronLeft, Plus } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { useRouter } from "next/navigation";
+import { CreateAlbumDialog } from "@/components/create-album-dialog";
+import { useAlbumStore } from "@/lib/store";
+import { getFoldersForAlbum } from "@/lib/services/folder-service";
+import { Logo } from "@/components/logo";
+import { CuteFolder } from "@/components/cute-folder";
 
 
-const fetcher = (url: any) => fetch(url).then((r: any) => r.json())
 
 type Params = {
-  id: string
-}
+  id: string;
+};
 
 export default function AlbumPage({
   params,
 }: {
-  params: Promise<{ id: string, folderId: string}>
+  params: Promise<{ id: string; folderId: string }>;
 }) {
   const unwrapParams = use(params);
-  const router = useRouter()
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
-  const [folders, setFolders] = useState<any[]>([])
-  const [isLoading, setIsLoading] = useState(true)
-  const { albums, addAlbum, setSelectedAlbum } = useAlbumStore()
-  const { data, error } = useSWR('/api/data', fetcher)
-  // APIを叩く動作を作るぞ
+  const router = useRouter();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [createAlbumOpen, setCreateAlbumOpen] = useState(false);
+  const [folders, setFolders] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const { albums, addAlbum, setSelectedAlbum } = useAlbumStore();
+
   // Update selected album when the page loads
   useEffect(() => {
-    setSelectedAlbum(unwrapParams.id)
-  }, [unwrapParams.id, setSelectedAlbum])
+    setSelectedAlbum(unwrapParams.id);
+  }, [unwrapParams.id, setSelectedAlbum]);
 
   // Fetch folders when the album ID changes
   useEffect(() => {
     const loadFolders = async () => {
-      setIsLoading(true)
+      setIsLoading(true);
       try {
-        const folderData = await getFoldersForAlbum(unwrapParams.id)
-        setFolders(folderData)
+        const folderData = await getFoldersForAlbum(unwrapParams.id);
+        setFolders(folderData);
       } catch (error) {
-        console.error("Error loading folders:", error)
+        console.error("Error loading folders:", error);
         // Set default folders in case of error
         setFolders([
           { id: "smile", name: "Smile" },
           { id: "cry", name: "Cry" },
           { id: "funny", name: "Funny" },
           { id: "normal", name: "Normal" },
-        ])
+        ]);
       } finally {
-        setIsLoading(false)
+        setIsLoading(false);
       }
-    }
+    };
 
-    loadFolders()
-  }, [unwrapParams.id])
+    loadFolders();
+  }, [unwrapParams.id]);
 
   // Get album title based on ID
   const getAlbumTitle = (id: string) => {
-    const album = albums.find((a) => a.id === id)
-    return album ? album.title : "アルバム"
-  }
+    const album = albums.find((a) => a.id === id);
+    return album ? album.title : "アルバム";
+  };
 
-  const albumTitle = getAlbumTitle(unwrapParams.id)
+  const albumTitle = getAlbumTitle(unwrapParams.id);
 
   // Handle folder click
   const handleFolderClick = (folderId: string) => {
-    router.push(`/album/${unwrapParams.id}/folder/${folderId}`)
-  }
+    router.push(`/album/${unwrapParams.id}/folder/${folderId}`);
+  };
 
   // Handle album creation
   const handleAlbumCreate = (newAlbum: any) => {
-    addAlbum(newAlbum)
-  }
+    addAlbum(newAlbum);
+  };
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
@@ -87,7 +84,7 @@ export default function AlbumPage({
       <div
         className={cn(
           "relative flex flex-col bg-[#f8d7e0] transition-all duration-300 ease-in-out",
-          sidebarCollapsed ? "w-0" : "w-64",
+          sidebarCollapsed ? "w-0" : "w-64"
         )}
       >
         {/* Toggle button */}
@@ -95,7 +92,12 @@ export default function AlbumPage({
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="absolute -right-8 top-6 z-10 rounded-r-full bg-[#f8d7e0] p-2 shadow-md hover:bg-[#f0c0d0] transition-all duration-300"
         >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform", sidebarCollapsed && "rotate-180")} />
+          <ChevronLeft
+            className={cn(
+              "h-4 w-4 transition-transform",
+              sidebarCollapsed && "rotate-180"
+            )}
+          />
         </button>
 
         <div className="flex-1 overflow-hidden">
@@ -116,7 +118,9 @@ export default function AlbumPage({
                   href={`/album/${album.id}`}
                   className={cn(
                     "card-cute block w-full rounded-md p-4 text-left",
-                    album.selected ? "bg-[#e8a0b0] hover:bg-[#e090a0]" : "bg-[#f0c0d0] hover:bg-[#e8b0c0]",
+                    album.selected
+                      ? "bg-[#e8a0b0] hover:bg-[#e090a0]"
+                      : "bg-[#f0c0d0] hover:bg-[#e8b0c0]"
                   )}
                 >
                   <div className="text-xs text-gray-600">{album.date}</div>
@@ -139,7 +143,10 @@ export default function AlbumPage({
             <Link href="/" className="mr-2">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <Link href={`/album/${unwrapParams.id}`} className="text-xl font-medium hover:underline">
+            <Link
+              href={`/album/${unwrapParams.id}`}
+              className="text-xl font-medium hover:underline"
+            >
               {albumTitle}
             </Link>
             <span className="mx-1 text-xl font-medium">&gt;</span>
@@ -189,8 +196,11 @@ export default function AlbumPage({
       </div>
 
       {/* Create Album Dialog */}
-      <CreateAlbumDialog open={createAlbumOpen} onOpenChange={setCreateAlbumOpen} onAlbumCreate={handleAlbumCreate} />
+      <CreateAlbumDialog
+        open={createAlbumOpen}
+        onOpenChange={setCreateAlbumOpen}
+        onAlbumCreate={handleAlbumCreate}
+      />
     </div>
-  )
+  );
 }
-

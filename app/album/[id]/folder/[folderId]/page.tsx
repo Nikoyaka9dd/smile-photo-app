@@ -10,6 +10,10 @@ import { CreateAlbumDialog } from "@/components/create-album-dialog"
 import { useAlbumStore } from "@/lib/store"
 import { getFoldersForAlbum } from "@/lib/services/folder-service"
 import { Logo } from "@/components/logo"
+import useSWR from "swr";
+import axios from 'axios'
+
+const fetcher = (url: string) => axios.get(url).then(res => res.data)
 
 interface Photo {
   id: string
@@ -38,7 +42,13 @@ export default function FolderPage({
   const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
   const [currentFolder, setCurrentFolder] = useState<any | null>(null)
   const { albums, addAlbum, setSelectedAlbum } = useAlbumStore()
-  console.log(unwrapParams.id);
+  // TODO: 画像と割り振り先のフォルダをGETしてゴニョゴニョ
+  const { data, error } = useSWR(
+    "https://jsonplaceholder.typicode.com/todos/1",
+    fetcher
+  );
+  console.log(data);
+  // APIを叩く動作を作るぞ
 
   // Update selected album when the page loads
   useEffect(() => {
