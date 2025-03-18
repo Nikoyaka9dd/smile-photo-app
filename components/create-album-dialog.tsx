@@ -114,7 +114,7 @@ export function CreateAlbumDialog({
     };
 
     const formData = new FormData();
-    formData.append("title", "ho");
+    formData.append("title", albumName);
     selectedFiles.forEach((file, index) => {
       formData.append("images", file);
     });
