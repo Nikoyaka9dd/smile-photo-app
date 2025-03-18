@@ -6,7 +6,6 @@ import "./globals.css"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "SmilePhoto - 思い返そう、あの写真",
   description: "AIによる表情分析で感情ごとに写真を整理することができます。",
     generator: 'v0.dev'
 }

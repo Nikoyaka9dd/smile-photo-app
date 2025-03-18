@@ -3,14 +3,15 @@ import Link from "next/link"
 
 interface LogoProps {
   className?: string
-  size?: "small" | "medium" | "large"
+  size?: "small" | "medium" | "large" | "custom"
 }
 
-export function Logo({ className = "", size = "medium" }: LogoProps) {
+export function Logo({ className = "", size = "custom" }: LogoProps) {
   const sizes = {
     small: { width: 120, height: 40 },
     medium: { width: 180, height: 60 },
     large: { width: 240, height: 80 },
+    custom: { width: 360, height: 120},
   }
 
   const { width, height } = sizes[size]

@@ -26,18 +26,18 @@ export default function SmilePhotoApp() {
           if (entry.isIntersecting) {
             const index = sectionRefs.current.findIndex((ref) => ref === entry.target)
             if (index !== -1 && !visibleSections.includes(index)) {
-              setVisibleSections((prev) => [...prev, index])
+              setVisibleSections(prev => [...prev, index])
             }
           }
         })
       },
-      { threshold: 0.1 },
+      { threshold: 0.1 }
     )
-
+  
     sectionRefs.current.forEach((ref) => {
       if (ref) observer.observe(ref)
     })
-
+  
     return () => {
       sectionRefs.current.forEach((ref) => {
         if (ref) observer.unobserve(ref)
@@ -54,27 +54,27 @@ export default function SmilePhotoApp() {
     {
       id: "family",
       image: "/placeholder.svg?height=200&width=300",
-      alt: "家族の食事の写真",
+      alt: "",
     },
     {
       id: "snowboard",
       image: "/placeholder.svg?height=200&width=300",
-      alt: "スノーボードをする人の写真",
+      alt: "",
     },
     {
       id: "kimono",
       image: "/placeholder.svg?height=200&width=300",
-      alt: "着物を着た女性の写真",
+      alt: "",
     },
     {
       id: "baby",
       image: "/placeholder.svg?height=200&width=300",
-      alt: "ヘッドフォンをつけた赤ちゃんの写真",
+      alt: "",
     },
     {
       id: "cones",
       image: "/placeholder.svg?height=200&width=300",
-      alt: "カラフルなコーンをかぶった人々の写真",
+      alt: "",
     },
   ]
 
@@ -130,55 +130,54 @@ export default function SmilePhotoApp() {
 
       {/* Main content */}
       <div className="relative flex-1 overflow-y-auto">
-        <div className="p-4">
+        <div className="pr-0">
           {/* Logo */}
-          <div className="mb-4 flex justify-end">
+          <div className="mb-4 flex justify-end pr-0">
             <div className="text-right">
-              <Logo size="medium" />
+              <Logo size="custom" />
             </div>
           </div>
 
           {/* Main heading */}
           <div
-            ref={(el) => (sectionRefs.current[0] = el)}
+          ref={(el) => { sectionRefs.current[0] = el }}
             className={cn(
               "mb-8 transform transition-all duration-500",
-              visibleSections.includes(0) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+              visibleSections.includes(0) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
             )}
           >
-            <h2 className="mb-4 text-3xl font-bold">思い返そう、あの笑顔</h2>
-            <p className="mb-2 text-lg">友達との旅行、お子様の成長記録......</p>
-            <p className="mb-6 text-lg">
-              大切な写真を、AIと一緒に
-              <br />
-              楽に整理しましょう。
-            </p>
-            <p className="mb-6 text-sm text-gray-600">
-              <span className="text-xs">思い返そう、あの写真</span>
-              <br />
-              SmilePhotoはAIによる表情分析で
-              <br />
-              感情ごとに写真を整理することが
-              <br />
-              できます。
-            </p>
+            <div className="flex items-start justify-center pb-12">
+              <div className="max-w-2xl w-full text-center">
+                <h2 className="mb-4 text-5xl font-bold">思い返そう、あの笑顔</h2>
+                <p className="mb-2 text-2xl">友達との旅行、お子様の成長記録......</p>
+                <p className="mb-2 text-2xl">
+                  大切な写真を、AIと一緒に楽に整理しましょう。
+                </p>
+                <p className="mb-2 text-2xl text-gray-600">
+                  <br />
+                  SmilePhotoはAIによる表情分析で
+                  <br />
+                  感情ごとに写真を整理することができます。
+                </p>
+              </div>
+            </div>
           </div>
 
           {/* Photo grid */}
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
             <div
-              ref={(el) => (sectionRefs.current[1] = el)}
+              ref={(el) => { sectionRefs.current[1] = el }}
               className={cn(
                 "transform transition-all duration-500 delay-100",
-                visibleSections.includes(1) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
+                 visibleSections.includes(1) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
               )}
             >
               <div className="card-cute overflow-hidden rounded-lg">
                 <Image
-                  src="/placeholder.svg?height=300&width=400"
+                  src="/images/partyHFKE0880_TP_V.jpg"
                   alt="家族の食事の写真"
-                  width={400}
-                  height={300}
+                  width={300}
+                  height={200}
                   className="rounded-md object-cover w-full h-full"
                 />
               </div>
@@ -186,7 +185,7 @@ export default function SmilePhotoApp() {
 
             <div className="grid grid-cols-1 gap-4">
               <div
-                ref={(el) => (sectionRefs.current[2] = el)}
+              ref={(el) => { sectionRefs.current[2] = el }}
                 className={cn(
                   "transform transition-all duration-500 delay-200",
                   visibleSections.includes(2) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
@@ -194,8 +193,8 @@ export default function SmilePhotoApp() {
               >
                 <div className="card-cute overflow-hidden rounded-lg">
                   <Image
-                    src="/placeholder.svg?height=200&width=300"
-                    alt="着物を着た女性の写真"
+                    src="/images/medama458A9913_TP_V.jpg"
+                    alt="謎の男"
                     width={300}
                     height={200}
                     className="rounded-md object-cover w-full h-full"
@@ -204,7 +203,7 @@ export default function SmilePhotoApp() {
               </div>
 
               <div
-                ref={(el) => (sectionRefs.current[3] = el)}
+              ref={(el) => { sectionRefs.current[3] = el }}
                 className={cn(
                   "transform transition-all duration-500 delay-300",
                   visibleSections.includes(3) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
@@ -212,8 +211,8 @@ export default function SmilePhotoApp() {
               >
                 <div className="card-cute overflow-hidden rounded-lg">
                   <Image
-                    src="/placeholder.svg?height=200&width=300"
-                    alt="スノーボードをする人の写真"
+                    src="/images/OOKPAR563461612_TP_V.jpg"
+                    alt="確定申告が終わらない"
                     width={300}
                     height={200}
                     className="rounded-md object-cover w-full h-full"
@@ -223,7 +222,7 @@ export default function SmilePhotoApp() {
             </div>
 
             <div
-              ref={(el) => (sectionRefs.current[4] = el)}
+            ref={(el) => { sectionRefs.current[4] = el }}
               className={cn(
                 "transform transition-all duration-500 delay-400",
                 visibleSections.includes(4) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
@@ -231,8 +230,8 @@ export default function SmilePhotoApp() {
             >
               <div className="card-cute overflow-hidden rounded-lg">
                 <Image
-                  src="/placeholder.svg?height=300&width=300"
-                  alt="ヘッドフォンをつけた赤ちゃんの写真"
+                  src="/images/babyFTHG7523_TP_V.jpg"
+                  alt="泣くなよベイビー"
                   width={300}
                   height={300}
                   className="rounded-md object-cover w-full h-full"
@@ -241,7 +240,7 @@ export default function SmilePhotoApp() {
             </div>
 
             <div
-              ref={(el) => (sectionRefs.current[5] = el)}
+            ref={(el) => { sectionRefs.current[5] = el }}
               className={cn(
                 "transform transition-all duration-500 delay-500",
                 visibleSections.includes(5) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",
@@ -249,7 +248,7 @@ export default function SmilePhotoApp() {
             >
               <div className="card-cute overflow-hidden rounded-lg">
                 <Image
-                  src="/placeholder.svg?height=200&width=300"
+                  src="/images/susiueseii-PAR50051-8988_TP_V.jpg"
                   alt="カラフルなコーンをかぶった人々の写真"
                   width={300}
                   height={200}
@@ -261,7 +260,9 @@ export default function SmilePhotoApp() {
 
           {/* Create album button (bottom) */}
           <div
-            ref={(el) => (sectionRefs.current[6] = el)}
+            ref={(el) => {
+              sectionRefs.current[6] = el;
+            }}
             className={cn(
               "mt-8 flex justify-center transform transition-all duration-500 delay-600",
               visibleSections.includes(6) ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0",

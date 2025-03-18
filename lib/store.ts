@@ -18,16 +18,8 @@ export const useAlbumStore = create<AlbumStore>()(
   persist(
     (set) => ({
       albums: [
-        { id: "1", title: "函館旅行", date: "2023/3/9-2023/3/11" },
-        { id: "2", title: "関西ビギナー旅行", date: "2023/3/7-2023/3/10" },
-        { id: "3", title: "ビギナーズハッカソン", date: "yyyy/mm/dd" },
-        { id: "4", title: "---", date: "yyyy/mm/dd" },
-        { id: "5", title: "---", date: "yyyy/mm/dd" },
-        { id: "6", title: "---", date: "yyyy/mm/dd" },
-        { id: "7", title: "---", date: "yyyy/mm/dd" },
-        { id: "8", title: "---", date: "yyyy/mm/dd" },
-        { id: "9", title: "---", date: "yyyy/mm/dd" },
-        { id: "10", title: "---", date: "yyyy/mm/dd" },
+        { id: "1", title: "入学式", date: "2023/4/1" },
+        { id: "2", title: "函館旅行", date: "2024/3/9-2024/3/11" },
       ],
       addAlbum: (album) =>
         set((state) => ({

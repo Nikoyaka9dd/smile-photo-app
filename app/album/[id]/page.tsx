@@ -12,6 +12,7 @@ import { getFoldersForAlbum } from "@/lib/services/folder-service"
 import { Logo } from "@/components/logo"
 import { CuteFolder } from "@/components/cute-folder"
 
+
 type Params = {
   id: string
 }
