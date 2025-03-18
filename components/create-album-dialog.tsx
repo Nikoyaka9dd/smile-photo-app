@@ -38,6 +38,7 @@ export function CreateAlbumDialog({
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [isDragging, setIsDragging] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // ロード中の状態を追加
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const dirInputRef = useRef<HTMLInputElement>(null);
@@ -96,6 +97,7 @@ export function CreateAlbumDialog({
   };
 
   const handleCreateAlbum = () => {
+    setIsLoading(true); // ロード中に設定
     // Format the date range
     const dateRange =
       startDate && endDate
@@ -141,9 +143,13 @@ export function CreateAlbumDialog({
       })
       .then(function (response) {
         console.log(response);
+        router.push(`/album/${fieldId}`);
       })
       .catch(function (error) {
         console.log(error);
+      })
+      .finally(() => {
+        setIsLoading(false); // ロード終了
       });
 
     // Close the dialog
@@ -154,8 +160,6 @@ export function CreateAlbumDialog({
     setStartDate("");
     setEndDate("");
     setSelectedFiles([]);
-
-    router.push(`/album/${fieldId}`);
   };
 
   return (
@@ -165,95 +169,97 @@ export function CreateAlbumDialog({
           <DialogTitle>アルバム新規作成</DialogTitle>
         </DialogHeader>
         <div className="grid gap-4 py-4">
-          <div className="grid gap-2">
-            <label htmlFor="album-name" className="text-sm font-medium">
-              アルバム名
-            </label>
-            <input
-              id="album-name"
-              value={albumName}
-              onChange={(e) => setAlbumName(e.target.value)}
-              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              placeholder="アルバム名を入力"
-            />
-          </div>
-          <div className="grid gap-2">
-            <label htmlFor="album-date" className="text-sm font-medium">
-              日付
-            </label>
-            <div className="flex items-center gap-2">
+          <>
+            <div className="grid gap-2">
+              <label htmlFor="album-name" className="text-sm font-medium">
+                アルバム名
+              </label>
               <input
-                id="album-date-start"
-                type="date"
-                value={startDate}
-                onChange={(e) => setStartDate(e.target.value)}
+                id="album-name"
+                value={albumName}
+                onChange={(e) => setAlbumName(e.target.value)}
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-              />
-              <span>-</span>
-              <input
-                id="album-date-end"
-                type="date"
-                value={endDate}
-                onChange={(e) => setEndDate(e.target.value)}
-                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                placeholder="アルバム名を入力"
               />
             </div>
-          </div>
+            <div className="grid gap-2">
+              <label htmlFor="album-date" className="text-sm font-medium">
+                日付
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  id="album-date-start"
+                  type="date"
+                  value={startDate}
+                  onChange={(e) => setStartDate(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+                <span>-</span>
+                <input
+                  id="album-date-end"
+                  type="date"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                />
+              </div>
+            </div>
 
-          {/* File upload area */}
-          <div className="grid gap-2">
-            <label className="text-sm font-medium">写真をインポート</label>
-            <div
-              className={`border-2 border-dashed rounded-md p-6 text-center ${
-                isDragging ? "border-pink-400 bg-pink-50" : "border-gray-300"
-              }`}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              onDrop={handleDrop}
-            >
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileChange}
-                className="hidden"
-                accept="image/*"
-                multiple
-              />
-              <input
-                type="file"
-                ref={dirInputRef}
-                onChange={handleDirChange}
-                className="hidden"
-              />
-              <div className="flex flex-col items-center justify-center gap-2">
-                <Upload className="h-10 w-10 text-gray-400" />
-                <p className="text-sm text-gray-600">
-                  ここに写真またはフォルダをドラッグ＆ドロップ
-                </p>
-                <p className="text-xs text-gray-500">または</p>
-                <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBrowseClick}
-                    className="text-xs"
-                  >
-                    <ImageIcon className="mr-2 h-4 w-4" />
-                    写真を選択
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleBrowseFolderClick}
-                    className="text-xs"
-                  >
-                    <FolderOpen className="mr-2 h-4 w-4" />
-                    フォルダを選択
-                  </Button>
+            {/* File upload area */}
+            <div className="grid gap-2">
+              <label className="text-sm font-medium">写真をインポート</label>
+              <div
+                className={`border-2 border-dashed rounded-md p-6 text-center ${
+                  isDragging ? "border-pink-400 bg-pink-50" : "border-gray-300"
+                }`}
+                onDragOver={handleDragOver}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+              >
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleFileChange}
+                  className="hidden"
+                  accept="image/*"
+                  multiple
+                />
+                <input
+                  type="file"
+                  ref={dirInputRef}
+                  onChange={handleDirChange}
+                  className="hidden"
+                />
+                <div className="flex flex-col items-center justify-center gap-2">
+                  <Upload className="h-10 w-10 text-gray-400" />
+                  <p className="text-sm text-gray-600">
+                    ここに写真またはフォルダをドラッグ＆ドロップ
+                  </p>
+                  <p className="text-xs text-gray-500">または</p>
+                  <div className="flex flex-col sm:flex-row gap-2 justify-center">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleBrowseClick}
+                      className="text-xs"
+                    >
+                      <ImageIcon className="mr-2 h-4 w-4" />
+                      写真を選択
+                    </Button>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleBrowseFolderClick}
+                      className="text-xs"
+                    >
+                      <FolderOpen className="mr-2 h-4 w-4" />
+                      フォルダを選択
+                    </Button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
+          </>
 
           {/* Selected files preview */}
           {selectedFiles.length > 0 && (
@@ -312,10 +318,10 @@ export function CreateAlbumDialog({
           <Button
             className="bg-[#f8d7e0] text-black hover:bg-[#f0c0d0]"
             onClick={handleCreateAlbum}
-            disabled={!albumName || selectedFiles.length === 0}
+            disabled={!albumName || selectedFiles.length === 0 || isLoading}
           >
             <Check className="mr-2 h-4 w-4" />
-            作成
+            {isLoading ? "作成中" : "作成"}
           </Button>
         </div>
       </DialogContent>
