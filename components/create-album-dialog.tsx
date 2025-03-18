@@ -1,109 +1,169 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useRef } from "react"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { FolderOpen, Upload, X, ImageIcon, Check } from "lucide-react"
-import Image from "next/image"
-import type { Album } from "@/lib/store"
+import { useState, useRef } from "react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { FolderOpen, Upload, X, ImageIcon, Check } from "lucide-react";
+import Image from "next/image";
+import type { Album } from "@/lib/store";
+import axios from "axios";
+import { useRouter } from "next/navigation";
 
 // Fix the TypeScript error with the directory attribute by adding a custom type declaration
 declare module "react" {
   interface HTMLAttributes<T> extends React.HTMLAttributes<T> {
     // Add support for the non-standard directory attribute
-    directory?: string
-    webkitdirectory?: string
+    directory?: string;
+    webkitdirectory?: string;
   }
 }
 
 interface CreateAlbumDialogProps {
-  open: boolean
-  onOpenChange: (open: boolean) => void
-  onAlbumCreate: (album: Album) => void
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onAlbumCreate: (album: Album) => void;
 }
 
-export function CreateAlbumDialog({ open, onOpenChange, onAlbumCreate }: CreateAlbumDialogProps) {
-  const [albumName, setAlbumName] = useState("")
-  const [startDate, setStartDate] = useState("")
-  const [endDate, setEndDate] = useState("")
-  const [isDragging, setIsDragging] = useState(false)
-  const [selectedFiles, setSelectedFiles] = useState<File[]>([])
-  const fileInputRef = useRef<HTMLInputElement>(null)
-  const dirInputRef = useRef<HTMLInputElement>(null)
+export function CreateAlbumDialog({
+  open,
+  onOpenChange,
+  onAlbumCreate,
+}: CreateAlbumDialogProps) {
+  const [albumName, setAlbumName] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const dirInputRef = useRef<HTMLInputElement>(null);
+
+  const router = useRouter();
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = () => {
-    setIsDragging(false)
-  }
+    setIsDragging(false);
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
+    e.preventDefault();
+    setIsDragging(false);
 
     if (e.dataTransfer.files) {
-      const filesArray = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith("image/"))
-      setSelectedFiles((prev) => [...prev, ...filesArray])
+      const filesArray = Array.from(e.dataTransfer.files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+      setSelectedFiles((prev) => [...prev, ...filesArray]);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const filesArray = Array.from(e.target.files).filter((file) => file.type.startsWith("image/"))
-      setSelectedFiles((prev) => [...prev, ...filesArray])
+      const filesArray = Array.from(e.target.files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+      setSelectedFiles((prev) => [...prev, ...filesArray]);
     }
-  }
+  };
 
   const handleDirChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const filesArray = Array.from(e.target.files).filter((file) => file.type.startsWith("image/"))
-      setSelectedFiles((prev) => [...prev, ...filesArray])
+      const filesArray = Array.from(e.target.files).filter((file) =>
+        file.type.startsWith("image/")
+      );
+      setSelectedFiles((prev) => [...prev, ...filesArray]);
     }
-  }
+  };
 
   const handleRemoveFile = (index: number) => {
-    setSelectedFiles((prev) => prev.filter((_, i) => i !== index))
-  }
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
 
   const handleBrowseClick = () => {
-    fileInputRef.current?.click()
-  }
+    fileInputRef.current?.click();
+  };
 
   const handleBrowseFolderClick = () => {
-    dirInputRef.current?.click()
-  }
+    dirInputRef.current?.click();
+  };
 
   const handleCreateAlbum = () => {
     // Format the date range
     const dateRange =
       startDate && endDate
-        ? `${startDate.replace(/-/g, "/")}${endDate ? `-${endDate.replace(/-/g, "/")}` : ""}`
-        : "yyyy/mm/dd"
+        ? `${startDate.replace(/-/g, "/")}${
+            endDate ? `-${endDate.replace(/-/g, "/")}` : ""
+          }`
+        : "yyyy/mm/dd";
+
+    const fieldId = Date.now().toString();
 
     // Create a new album object
-    const newAlbum: Album = {
-      id: Date.now().toString(), // Generate a unique ID based on timestamp
+    const newAlbum = {
+      id: fieldId, // Generate a unique ID based on timestamp
       title: albumName,
       date: dateRange,
+    };
+
+    const formData = new FormData();
+    formData.append("title", "ho");
+    selectedFiles.forEach((file, index) => {
+      formData.append("images", file);
+    });
+    formData.append("id", fieldId);
+
+    console.log("FormData entries:");
+    for (let [key, value] of formData.entries()) {
+      if (value instanceof File) {
+        console.log(key, {
+          name: value.name,
+          type: value.type,
+          size: value.size,
+        });
+      } else {
+        console.log(key, value);
+      }
     }
+    console.log("formDAta", formData);
+    console.log("newAlbum", newAlbum);
+
+    axios
+      .post("https://5905-126-158-191-212.ngrok-free.app//upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      })
+      .then(function (response) {
+        console.log(response);
+      })
+      .catch(function (error) {
+        console.log(error);
+      });
 
     // Call the callback to add the album to the list
-    onAlbumCreate(newAlbum)
+    onAlbumCreate(newAlbum);
 
     // Close the dialog
-    onOpenChange(false)
+    onOpenChange(false);
 
     // Reset form
-    setAlbumName("")
-    setStartDate("")
-    setEndDate("")
-    setSelectedFiles([])
-  }
+    setAlbumName("");
+    setStartDate("");
+    setEndDate("");
+    setSelectedFiles([]);
+
+    router.push(`/album/${fieldId}`);
+  };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -176,14 +236,26 @@ export function CreateAlbumDialog({ open, onOpenChange, onAlbumCreate }: CreateA
               />
               <div className="flex flex-col items-center justify-center gap-2">
                 <Upload className="h-10 w-10 text-gray-400" />
-                <p className="text-sm text-gray-600">ここに写真またはフォルダをドラッグ＆ドロップ</p>
+                <p className="text-sm text-gray-600">
+                  ここに写真またはフォルダをドラッグ＆ドロップ
+                </p>
                 <p className="text-xs text-gray-500">または</p>
                 <div className="flex flex-col sm:flex-row gap-2 justify-center">
-                  <Button type="button" variant="outline" onClick={handleBrowseClick} className="text-xs">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBrowseClick}
+                    className="text-xs"
+                  >
                     <ImageIcon className="mr-2 h-4 w-4" />
                     写真を選択
                   </Button>
-                  <Button type="button" variant="outline" onClick={handleBrowseFolderClick} className="text-xs">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleBrowseFolderClick}
+                    className="text-xs"
+                  >
                     <FolderOpen className="mr-2 h-4 w-4" />
                     フォルダを選択
                   </Button>
@@ -196,8 +268,15 @@ export function CreateAlbumDialog({ open, onOpenChange, onAlbumCreate }: CreateA
           {selectedFiles.length > 0 && (
             <div className="grid gap-2">
               <div className="flex items-center justify-between">
-                <label className="text-sm font-medium">選択された写真 ({selectedFiles.length})</label>
-                <Button variant="ghost" size="sm" onClick={() => setSelectedFiles([])} className="h-8 px-2 text-xs">
+                <label className="text-sm font-medium">
+                  選択された写真 ({selectedFiles.length})
+                </label>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setSelectedFiles([])}
+                  className="h-8 px-2 text-xs"
+                >
                   すべてクリア
                 </Button>
               </div>
@@ -209,7 +288,9 @@ export function CreateAlbumDialog({ open, onOpenChange, onAlbumCreate }: CreateA
                         {file.type.startsWith("image/") ? (
                           <div className="relative w-full h-full">
                             <Image
-                              src={URL.createObjectURL(file) || "/placeholder.svg"}
+                              src={
+                                URL.createObjectURL(file) || "/placeholder.svg"
+                              }
                               alt={file.name}
                               fill
                               className="object-cover"
@@ -248,6 +329,5 @@ export function CreateAlbumDialog({ open, onOpenChange, onAlbumCreate }: CreateA
         </div>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-

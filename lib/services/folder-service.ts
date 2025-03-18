@@ -16,7 +16,7 @@ export async function getFoldersForAlbum(albumId: string): Promise<EmotionFolder
     { id: "smile", name: "Smile", },
     { id: "cry", name: "Cry", },
     { id: "funny", name: "Funny", },
-    { id: "normal", name: "Normal", },
+    { id: "straight", name: "Straight", },
   ]
 }
 

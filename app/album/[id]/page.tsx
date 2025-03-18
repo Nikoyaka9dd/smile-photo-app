@@ -50,7 +50,7 @@ export default function AlbumPage({
           { id: "smile", name: "Smile" },
           { id: "cry", name: "Cry" },
           { id: "funny", name: "Funny" },
-          { id: "normal", name: "Normal" },
+          { id: "straight", name: "Straight" },
         ]);
       } finally {
         setIsLoading(false);

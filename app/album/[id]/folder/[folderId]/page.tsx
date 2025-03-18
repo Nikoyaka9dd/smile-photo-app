@@ -1,90 +1,103 @@
-"use client"
+"use client";
 
-import { useState, useEffect, use } from "react"
-import Image from "next/image"
-import Link from "next/link"
-import { ChevronLeft, Plus, Heart } from "lucide-react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-import { CreateAlbumDialog } from "@/components/create-album-dialog"
-import { useAlbumStore } from "@/lib/store"
-import { getFoldersForAlbum } from "@/lib/services/folder-service"
-import { Logo } from "@/components/logo"
+import { useState, useEffect, use } from "react";
+import Image from "next/image";
+import Link from "next/link";
+import { ChevronLeft, Plus, Heart } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+import { CreateAlbumDialog } from "@/components/create-album-dialog";
+import { useAlbumStore } from "@/lib/store";
+import { getFoldersForAlbum } from "@/lib/services/folder-service";
+import { Logo } from "@/components/logo";
 import useSWR from "swr";
-import axios from 'axios'
+import axios from "axios";
+import { useParams } from "next/navigation";
 
-const fetcher = (url: string) => axios.get(url).then(res => res.data)
+const fetcher = (url: string) => axios.get(url).then((res) => res.data);
 
 interface Photo {
-  id: string
-  src: string
-  alt: string
-  width: number
-  height: number
+  id: string;
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
 }
 
 // Sample photos for all folders
-const samplePhotos: Photo[] = []
+const samplePhotos: Photo[] = [];
 
 // Fix the type definition to match Next.js expectations
 type Params = {
-  id: string
-  folderId: string
-}
+  id: string;
+  folderId: string;
+};
 
 export default function FolderPage({
   params,
 }: {
-  params: Promise<{ id: string, folderId: string }>
+  params: Promise<{ id: string; folderId: string }>;
 }) {
   const unwrapParams = use(params);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
-  const [createAlbumOpen, setCreateAlbumOpen] = useState(false)
-  const [currentFolder, setCurrentFolder] = useState<any | null>(null)
-  const { albums, addAlbum, setSelectedAlbum } = useAlbumStore()
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [createAlbumOpen, setCreateAlbumOpen] = useState(false);
+  const [currentFolder, setCurrentFolder] = useState<any | null>(null);
+  const { albums, addAlbum, setSelectedAlbum } = useAlbumStore();
   // TODO: 画像と割り振り先のフォルダをGETしてゴニョゴニョ
-  const { data, error } = useSWR(
-    "https://jsonplaceholder.typicode.com/todos/1",
+  const emotion = useParams<{ id: string; folderId: string }>();
+  console.log("emotion", emotion.folderId);
+
+  const { data, error, isLoading } = useSWR(
+    `https://5905-126-158-191-212.ngrok-free.app`,
     fetcher
   );
-  console.log(data);
+
+  useEffect(() => {
+    setSelectedAlbum(unwrapParams.id);
+  }, [unwrapParams.id, setSelectedAlbum]);
+
   // APIを叩く動作を作るぞ
 
   // Update selected album when the page loads
-  useEffect(() => {
-    setSelectedAlbum(unwrapParams.id)
-  }, [unwrapParams.id, setSelectedAlbum])
 
   // Fetch folder information
   useEffect(() => {
     const loadFolderInfo = async () => {
       try {
-        const folders = await getFoldersForAlbum(unwrapParams.id)
-        const folder = folders.find((f: any) => f.id === unwrapParams.folderId)
+        const folders = await getFoldersForAlbum(unwrapParams.id);
+        const folder = folders.find((f: any) => f.id === unwrapParams.folderId);
         if (folder) {
-          setCurrentFolder(folder)
+          setCurrentFolder(folder);
         }
       } catch (error) {
-        console.error("Error loading folder info:", error)
+        console.error("Error loading folder info:", error);
       }
-    }
+    };
 
-    loadFolderInfo()
-  }, [unwrapParams.id, unwrapParams.folderId])
+    loadFolderInfo();
+  }, [unwrapParams.id, unwrapParams.folderId]);
 
   // Get album title based on ID
   const getAlbumTitle = (id: string) => {
-    const album = albums.find((a) => a.id === id)
-    return album ? album.title : "アルバム"
-  }
+    const album = albums.find((a) => a.id === id);
+    return album ? album.title : "アルバム";
+  };
 
-  const albumTitle = getAlbumTitle(unwrapParams.id)
-  const folderName = currentFolder?.name || unwrapParams.folderId
+  const albumTitle = getAlbumTitle(unwrapParams.id);
+  const folderName = currentFolder?.name || unwrapParams.folderId;
 
   // Handle album creation
   const handleAlbumCreate = (newAlbum: any) => {
-    addAlbum(newAlbum)
+    console.log("アルバム作成");
+    addAlbum(newAlbum);
+  };
+
+  if (isLoading) {
+    return <div>ちょっと待ってね...</div>;
   }
+  console.log(data);
+
+  console.log(data?.images);
 
   return (
     <div className="flex h-screen overflow-hidden bg-white">
@@ -92,7 +105,7 @@ export default function FolderPage({
       <div
         className={cn(
           "relative flex flex-col bg-[#f8d7e0] transition-all duration-300 ease-in-out",
-          sidebarCollapsed ? "w-0" : "w-64",
+          sidebarCollapsed ? "w-0" : "w-64"
         )}
       >
         {/* Toggle button */}
@@ -100,7 +113,12 @@ export default function FolderPage({
           onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
           className="absolute -right-8 top-6 z-10 rounded-r-full bg-[#f8d7e0] p-2 shadow-md hover:bg-[#f0c0d0] transition-all duration-300"
         >
-          <ChevronLeft className={cn("h-4 w-4 transition-transform", sidebarCollapsed && "rotate-180")} />
+          <ChevronLeft
+            className={cn(
+              "h-4 w-4 transition-transform",
+              sidebarCollapsed && "rotate-180"
+            )}
+          />
         </button>
 
         <div className="flex-1 overflow-hidden">
@@ -121,7 +139,9 @@ export default function FolderPage({
                   href={`/album/${album.id}`}
                   className={cn(
                     "card-cute block w-full rounded-md p-4 text-left",
-                    album.selected ? "bg-[#e8a0b0] hover:bg-[#e090a0]" : "bg-[#f0c0d0] hover:bg-[#e8b0c0]",
+                    album.selected
+                      ? "bg-[#e8a0b0] hover:bg-[#e090a0]"
+                      : "bg-[#f0c0d0] hover:bg-[#e8b0c0]"
                   )}
                 >
                   <div className="text-xs text-gray-600">{album.date}</div>
@@ -144,25 +164,28 @@ export default function FolderPage({
             <Link href={`/album/${unwrapParams.id}`} className="mr-2">
               <ChevronLeft className="h-5 w-5" />
             </Link>
-            <Link href={`/album/${unwrapParams.id}`} className="text-xl font-medium hover:underline">
+            <Link
+              href={`/album/${unwrapParams.id}`}
+              className="text-xl font-medium hover:underline"
+            >
               {albumTitle}
             </Link>
             <span className="mx-1 text-xl font-medium">&gt;</span>
             <span className="text-xl font-medium">{folderName}</span>
           </div>
-          <Logo size="large"/>
+          <Logo size="large" />
         </div>
 
         {/* Photo grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-6">
-          {samplePhotos.map((photo) => (
-            <div key={photo.id} className="col-span-1 group relative">
+          {data?.images?.map((photo) => (
+            <div key={photo} className="col-span-1 group relative">
               <div className="card-cute overflow-hidden rounded-lg">
                 <Image
-                  src={photo.src || "/placeholder.svg"}
-                  alt={photo.alt}
-                  width={photo.width}
-                  height={photo.height}
+                  src={photo || "/placeholder.svg"}
+                  alt={photo}
+                  width={50}
+                  height={50}
                   className="w-full rounded-md object-cover transition-transform duration-300 group-hover:scale-105"
                 />
               </div>
@@ -179,8 +202,11 @@ export default function FolderPage({
       </div>
 
       {/* Create Album Dialog */}
-      <CreateAlbumDialog open={createAlbumOpen} onOpenChange={setCreateAlbumOpen} onAlbumCreate={handleAlbumCreate} />
+      <CreateAlbumDialog
+        open={createAlbumOpen}
+        onOpenChange={setCreateAlbumOpen}
+        onAlbumCreate={handleAlbumCreate}
+      />
     </div>
-  )
+  );
 }
-
