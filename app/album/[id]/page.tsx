@@ -11,7 +11,10 @@ import { useAlbumStore } from "@/lib/store"
 import { getFoldersForAlbum } from "@/lib/services/folder-service"
 import { Logo } from "@/components/logo"
 import { CuteFolder } from "@/components/cute-folder"
+import useSWR from 'swr'
 
+
+const fetcher = (url: any) => fetch(url).then((r: any) => r.json())
 
 type Params = {
   id: string
@@ -29,6 +32,7 @@ export default function AlbumPage({
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { albums, addAlbum, setSelectedAlbum } = useAlbumStore()
+  const { data, error } = useSWR('/api/data', fetcher)
   // APIを叩く動作を作るぞ
   // Update selected album when the page loads
   useEffect(() => {
