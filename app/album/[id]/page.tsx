@@ -29,7 +29,7 @@ export default function AlbumPage({
   const [folders, setFolders] = useState<any[]>([])
   const [isLoading, setIsLoading] = useState(true)
   const { albums, addAlbum, setSelectedAlbum } = useAlbumStore()
-
+  // APIを叩く動作を作るぞ
   // Update selected album when the page loads
   useEffect(() => {
     setSelectedAlbum(unwrapParams.id)
