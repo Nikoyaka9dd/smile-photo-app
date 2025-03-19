@@ -65,7 +65,7 @@ export default function AlbumPage({
         // Set default folders in case of error
         setFolders([
           { id: "smile", name: "Smile" },
-          { id: "cry", name: "Cry" },
+          { id: "crying", name: "Cry" },
           { id: "funny", name: "Funny" },
           { id: "straight", name: "Straight" },
         ]);
